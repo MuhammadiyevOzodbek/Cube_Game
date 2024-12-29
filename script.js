@@ -8,7 +8,7 @@ let playerPosition = { x: 100, y: 100 }; // O'yinchi boshlang'ich pozitsiyasi
 let bots = [
     { x: 400, y: 400, speed: 2, targetX: 0, targetY: 0, state: 'idle' }  // Birinchi bot boshlang'ich pozitsiyasi va maqsadi
 ];
-const playerSpeed = 5;  // O'yinchi tezligi
+const playerSpeed = 10;  // O'yinchi tezligi
 let playerVelocity = { x: 0, y: 0 };  // O'yinchi tezligi
 let gamePaused = false;  // O'yinning holati, boshlang'ichda o'yin ishlamoqda
 
@@ -18,9 +18,9 @@ let botCreationInterval; // Yangi botni yaratish vaqti
 
 // O'yinchi harakatini boshqarish (W, A, S, D)
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        toggleGamePause();  // Esc tugmasi bosilganda o'yinni to'xtatish yoki davom ettirish
-    }
+    // if (e.key === 'Escape') {
+    //     toggleGamePause();  // Esc tugmasi bosilganda o'yinni to'xtatish yoki davom ettirish
+    // }
 
     if (gamePaused) return;  // Agar o'yin to'xtatilgan bo'lsa, harakatni blokla
 
