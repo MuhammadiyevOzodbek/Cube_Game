@@ -78,53 +78,191 @@ function updatePlayerPosition() {
     if (playerPosition.y < 0) playerPosition.y = 0;
     if (playerPosition.y > gameAreaHeight - 50) playerPosition.y = gameAreaHeight - 50;
 }
+/***************************************************************/
+class SuperAI {
+    constructor(bot) {
+        this.bot = bot;
+        this.strategyHistory = [];
+        this.performanceHistory = [];
+        this.communicationNetwork = [];
+        this.adaptiveLearningRate = 0.5;
+        this.neuralNetworkModel = new NeuralNetwork();
+        this.resources = { health: 100, energy: 100 };
+        this.emotionalState = 'neutral'; // Ruhiy holat
+    }
 
-// Botlarni o'yinchiga qarab harakatlantirish
-function moveBots() {
-    if (gamePaused) return;  // Agar o'yin to'xtatilgan bo'lsa, bot harakatini to'xtatish
-
-    bots.forEach(bot => {
-        // O'yinchiga qarab yo'nalish aniqlanadi
-        const directionX = playerPosition.x > bot.x ? 1 : -1;
-        const directionY = playerPosition.y > bot.y ? 1 : -1;
-
-        // O'yinchi bilan birga botlarni harakatlantirish (qiymatni optimallashtirish)
-        bot.x += bot.speed * directionX;
-        bot.y += bot.speed * directionY;
-
-        // Botning holatini yangilash
-        if (bot.state === 'idle') {
-            // Bot o'yinchini kuzatadi
-            const angle = Math.atan2(playerPosition.y - bot.y, playerPosition.x - bot.x);
-            bot.x += bot.speed * Math.cos(angle);
-            bot.y += bot.speed * Math.sin(angle);
-        } else if (bot.state === 'chase') {
-            // Bot o'yinchiga qattiqroq intiladi
-            const angle = Math.atan2(playerPosition.y - bot.y, playerPosition.x - bot.x);
-            bot.x += bot.speed * Math.cos(angle) * 1.2; // Bot tezligini 1.5 dan 1.2 ga kamaytirdik
-            bot.y += bot.speed * Math.sin(angle) * 1.2;
-        }
-
-        // Botlar orasida to'qnashuvni oldini olish
-        bots.forEach((otherBot, idx) => {
-            if (otherBot !== bot) {
-                const distance = Math.sqrt(Math.pow(bot.x - otherBot.x, 2) + Math.pow(bot.y - otherBot.y, 2));
-                if (distance < 50) {  // Agar botlar juda yaqin bo'lsa
-                    bot.x -= bot.speed * directionX * 0.5;
-                    bot.y -= bot.speed * directionY * 0.5;
-                }
-            }
+    synchronizeWithPeers() {
+        this.communicationNetwork.forEach(peerBot => {
+            let synchronizedStrategy = this.exchangeStrategies(peerBot);
+            this.bot.strategy = synchronizedStrategy;
         });
+    }
 
-        // Botlarni to'qnashmasligi uchun holatni o'zgartirish
-        if (Math.random() < 0.1) {  // Tasodifiy holatni o'zgartirish
-            bot.state = bot.state === 'idle' ? 'chase' : 'idle';
+    exchangeStrategies(peerBot) {
+        let peerStrategy = peerBot.strategy;
+        if (this.bot.performanceHistory.length < 5) return peerStrategy;
+        let adaptiveStrategy = this.adjustStrategyBasedOnPerformance(peerStrategy);
+        return adaptiveStrategy;
+    }
+
+    adjustStrategyBasedOnPerformance(peerStrategy) {
+        let performance = this.evaluatePerformance();
+        if (performance < 50) {
+            return "defensive";
+        } else if (performance > 80) {
+            return "aggressive";
+        } else {
+            return peerStrategy;
         }
-    });
+    }
 
-    updatePositions();
+    selfLearn() {
+        let performance = this.evaluatePerformance();
+        let successRate = this.calculateSuccessRate();
+        this.neuralNetworkModel.train(performance, successRate);
+        this.adjustLearningRate();
+    }
+
+    evaluatePerformance() {
+        let pastPerformance = this.performanceHistory.reduce((sum, performance) => sum + performance, 0);
+        return pastPerformance / this.performanceHistory.length;
+    }
+
+    calculateSuccessRate() {
+        let totalActions = this.performanceHistory.length;
+        let successfulActions = this.performanceHistory.filter(score => score > 60).length;
+        return (successfulActions / totalActions) * 100;
+    }
+
+    adjustLearningRate() {
+        let currentLearningRate = this.neuralNetworkModel.getLearningRate();
+        if (currentLearningRate < 0.1) {
+            this.neuralNetworkModel.setLearningRate(this.adaptiveLearningRate);
+        }
+    }
+
+    emotionalDecisionMaking(player) {
+        let mood = this.analyzeEmotions(player);
+        if (mood === 'aggressive') {
+            this.bot.strategy = 'aggressive';
+        } else if (mood === 'calm') {
+            this.bot.strategy = 'defensive';
+        }
+    }
+
+    analyzeEmotions(player) {
+        if (player.health < 30) {
+            return 'aggressive';
+        } else if (player.health > 70) {
+            return 'calm';
+        } else {
+            return 'neutral';
+        }
+    }
+
+    analyzeGameContext(player) {
+        let analysis = {
+            position: player.position,
+            health: player.health,
+            nearbyObjects: this.scanForNearbyObjects(player),
+            enemyDistance: this.calculateDistanceToEnemy(player),
+            behaviorPatterns: this.getBehaviorPatterns(player),
+            timeLeft: player.timeLeft // Vaqtni ham hisoblash
+        };
+        let decision = this.makeComplexDecision(analysis);
+        return decision;
+    }
+
+    makeComplexDecision(analysis) {
+        this.synchronizeWithPeers();
+
+        let decisionScore = 0;
+        if (analysis.position === 'danger') decisionScore += 30;
+        if (analysis.health < 50) decisionScore += 40;
+        if (analysis.nearbyObjects.includes('powerup')) decisionScore += 30;
+        if (analysis.enemyDistance < 50) decisionScore += 50;
+
+        if (analysis.timeLeft < 10) decisionScore += 50; // Vaqtni tejash
+
+        return decisionScore > 70 ? 'attack' : 'defend';
+    }
+
+    scanForNearbyObjects(player) {
+        let objects = ['enemy', 'powerup', 'safezone'];
+        return objects.filter(obj => player.objects.includes(obj));
+    }
+
+    calculateDistanceToEnemy(player) {
+        let enemy = player.objects.find(obj => obj === 'enemy');
+        return Math.abs(player.position - enemy.position);
+    }
+
+    getBehaviorPatterns(player) {
+        // O'yinchining xatti-harakatlarini tahlil qilish
+        return player.behaviorPatterns;
+    }
+
+    manageResources() {
+        // Resurslarni boshqarish
+        if (this.resources.health < 50) {
+            this.bot.strategy = 'defensive';
+            console.log('Health low, switching to defensive mode.');
+        }
+        if (this.resources.energy < 30) {
+            this.bot.strategy = 'rest';
+            console.log('Energy low, bot is resting.');
+        }
+    }
+
+    creativityInDecisionMaking(player) {
+        // Yaratuvchan qarorlar
+        if (player.isPredictable()) {
+            console.log("Player is predictable, adjusting strategy!");
+            this.bot.strategy = 'unpredictable';
+        } else {
+            this.bot.strategy = 'aggressive';
+        }
+    }
+
+    adaptToUncertainty() {
+        // Noaniqlikka moslashish
+        let randomFactor = Math.random();
+        if (randomFactor > 0.7) {
+            this.bot.strategy = 'adaptive';
+            console.log("Random event occurred, adapting strategy.");
+        }
+    }
 }
 
+// Super aqlli botlarni ishlatish
+function superSmartAI(bot, player) {
+    let ai = new SuperAI(bot);
+
+    ai.selfLearn();
+    ai.emotionalDecisionMaking(player);
+    ai.manageResources(); // Resurslarni boshqarish
+    ai.creativityInDecisionMaking(player); // Yaratuvchan qarorlar
+    ai.adaptToUncertainty(); // Noaniqliklarga moslashish
+    let decision = ai.analyzeGameContext(player);
+
+    if (decision === "attack") {
+        bot.action = "attack";
+        console.log("Bot hujum qiladi!");
+    } else {
+        bot.action = "defend";
+        console.log("Bot himoya qiladi.");
+    }
+}
+
+// Botlarni boshqarish
+function manageBots(player) {
+    if (gamePaused) return;
+
+    bots.forEach(bot => {
+        superSmartAI(bot, player);
+    });
+}
+/************************************************************/
 // To'qnashuvni tekshirish
 function checkCollision() {
     if (gamePaused || gameOver) return;  // Agar o'yin to'xtatilgan bo'lsa yoki o'yin tugagan bo'lsa, tekshirishni to'xtatish
