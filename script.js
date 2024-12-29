@@ -16,12 +16,7 @@ let timeLeft = 10;  // 10 soniya vaqt
 let timeInterval;   // Vaqt intervali
 let botCreationInterval; // Yangi botni yaratish vaqti
 
-// O'yinchi harakatini boshqarish (W, A, S, D)
 document.addEventListener('keydown', (e) => {
-    // if (e.key === 'Escape') {
-    //     toggleGamePause();  // Esc tugmasi bosilganda o'yinni to'xtatish yoki davom ettirish
-    // }
-
     if (gamePaused) return;  // Agar o'yin to'xtatilgan bo'lsa, harakatni blokla
 
     switch (e.key) {
@@ -120,7 +115,7 @@ function moveBots() {
 }
 
 function checkCollision() {
-    if (gamePaused) return; // Agar o'yin to'xtatilgan bo'lsa, to'qnashuvni tekshirmaslik
+    if (gamePaused) return;  // Agar o'yin to'xtatilgan bo'lsa, to'qnashuvni tekshirmaslik
 
     const playerRect = playerCube.getBoundingClientRect(); // O'yinchi kvadratining chegaralari
     bots.forEach(bot => {
@@ -136,6 +131,7 @@ function checkCollision() {
         ) {
             alert("Game Over!");
             resetGame(); // O'yinni qayta boshlash
+            playerVelocity = { x: 0, y: 0 }; // O'yinchi tezligini 0 ga o'rnatish
         }
     });
 }
