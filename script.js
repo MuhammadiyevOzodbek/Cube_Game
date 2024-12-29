@@ -18,37 +18,45 @@ let botCreationInterval; // Yangi botni yaratish vaqti
 
 let gameOver = false; // O'yinning tugaganligini aniqlovchi flag
 
+let keysPressed = {}; // Tugmalarni bosish holatini saqlash
+
 // O'yinchi harakatini boshqarish (W, A, S, D)
 document.addEventListener('keydown', (e) => {
-    if (gameOver) return;  // Agar o'yin tugagan bo'lsa, harakatni blokla
+    if (gameOver || gamePaused) return;  // O'yin to'xtatilgan yoki tugagan bo'lsa, harakatni bloklash
 
-    switch (e.key) {
-        case 'w':
-        case 'W':
-            playerVelocity.y = -playerSpeed;  // Yuqoriga harakat
-            break;
-        case 's':
-        case 'S':
-            playerVelocity.y = playerSpeed;  // Pastga harakat
-            break;
-        case 'a':
-        case 'A':
-            playerVelocity.x = -playerSpeed;  // Chapga harakat
-            break;
-        case 'd':
-        case 'D':
-            playerVelocity.x = playerSpeed;  // O'ngga harakat
-            break;
+    keysPressed[e.key] = true;  // Tugma bosilganini belgilash
+
+    if (e.key === 'w' || e.key === 'W') {
+        playerVelocity.y = -playerSpeed;  // Yuqoriga harakat
+    }
+    if (e.key === 's' || e.key === 'S') {
+        playerVelocity.y = playerSpeed;  // Pastga harakat
+    }
+    if (e.key === 'a' || e.key === 'A') {
+        playerVelocity.x = -playerSpeed;  // Chapga harakat
+    }
+    if (e.key === 'd' || e.key === 'D') {
+        playerVelocity.x = playerSpeed;  // O'ngga harakat
     }
 });
 
 // Klavish tugmasi bo'shatilganida, tezlikni to'xtatish
 document.addEventListener('keyup', (e) => {
+    if (gameOver || gamePaused) return;  // O'yin to'xtatilgan yoki tugagan bo'lsa, harakatni bloklash
+
+    keysPressed[e.key] = false;  // Tugma bo'shatilganini belgilash
+
+    // Agar boshqa biror tugma hali bosilgan bo'lsa, harakatni to'xtatmang
     if (e.key === 'w' || e.key === 's' || e.key === 'W' || e.key === 'S') {
-        playerVelocity.y = 0;
+        if (!keysPressed['w'] && !keysPressed['s'] && !keysPressed['W'] && !keysPressed['S']) {
+            playerVelocity.y = 0; // Harakatni to'xtatish
+        }
     }
+
     if (e.key === 'a' || e.key === 'd' || e.key === 'A' || e.key === 'D') {
-        playerVelocity.x = 0;
+        if (!keysPressed['a'] && !keysPressed['d'] && !keysPressed['A'] && !keysPressed['D']) {
+            playerVelocity.x = 0; // Harakatni to'xtatish
+        }
     }
 });
 
