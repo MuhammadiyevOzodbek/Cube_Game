@@ -121,20 +121,22 @@ function moveBots() {
 
 // To'qnashuvni tekshirish
 function checkCollision() {
-    if (gamePaused) return;  // Agar o'yin to'xtatilgan bo'lsa, to'qnashuvni tekshirmaslik
+    if (gamePaused) return; // Agar o'yin to'xtatilgan bo'lsa, to'qnashuvni tekshirmaslik
 
     bots.forEach(bot => {
-        if (
-            playerPosition.x < bot.x + 50 &&
-            playerPosition.x + 50 > bot.x &&
-            playerPosition.y < bot.y + 50 &&
-            playerPosition.y + 50 > bot.y
-        ) {
+        // Bot va o'yinchining markazlaridan masofani hisoblash
+        const dx = playerPosition.x - bot.x; // O'yinchi va bot o'rtasidagi x masofa
+        const dy = playerPosition.y - bot.y; // O'yinchi va bot o'rtasidagi y masofa
+        const distance = Math.sqrt(dx * dx + dy * dy); // Evklid masofasi
+
+        // Masofa 50px yoki undan kichik bo'lsa, to'qnashuv bo'ladi
+        if (distance < 30) {
             alert("Game Over!");
-            resetGame();
+            resetGame(); // O'yinni qayta boshlash
         }
     });
 }
+
 
 // Pozitsiyalarni yangilash
 function updatePositions() {
