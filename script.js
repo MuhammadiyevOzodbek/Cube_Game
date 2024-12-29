@@ -16,8 +16,11 @@ let timeLeft = 10;  // 10 soniya vaqt
 let timeInterval;   // Vaqt intervali
 let botCreationInterval; // Yangi botni yaratish vaqti
 
+let gameOver = false; // O'yinning tugaganligini aniqlovchi flag
+
+// O'yinchi harakatini boshqarish (W, A, S, D)
 document.addEventListener('keydown', (e) => {
-    if (gamePaused) return;  // Agar o'yin to'xtatilgan bo'lsa, harakatni blokla
+    if (gameOver) return;  // Agar o'yin tugagan bo'lsa, harakatni blokla
 
     switch (e.key) {
         case 'w':
@@ -114,27 +117,34 @@ function moveBots() {
     updatePositions();
 }
 
+// To'qnashuvni tekshirish
 function checkCollision() {
-    if (gamePaused) return;  // Agar o'yin to'xtatilgan bo'lsa, to'qnashuvni tekshirmaslik
+    if (gamePaused || gameOver) return;  // Agar o'yin to'xtatilgan bo'lsa yoki o'yin tugagan bo'lsa, tekshirishni to'xtatish
 
-    const playerRect = playerCube.getBoundingClientRect(); // O'yinchi kvadratining chegaralari
+    const playerRect = playerCube.getBoundingClientRect();  // O'yinchining rectangle'ini olish
     bots.forEach(bot => {
         let botCube = document.getElementById(`botCube${bots.indexOf(bot)}`);
-        const botRect = botCube.getBoundingClientRect(); // Bot kvadratining chegaralari
+        if (!botCube) return;
 
-        // O'yinchi va botning to'qnashuvini tekshirish
+        const botRect = botCube.getBoundingClientRect();  // Botning rectangle'ini olish
+
+        // Agar o'yinchi va botning rectangle'lari to'qnashsa, game over
         if (
             playerRect.left < botRect.right &&
             playerRect.right > botRect.left &&
             playerRect.top < botRect.bottom &&
             playerRect.bottom > botRect.top
         ) {
-            alert("Game Over!");
-            resetGame(); // O'yinni qayta boshlash
-            playerVelocity = { x: 0, y: 0 }; // O'yinchi tezligini 0 ga o'rnatish
+            if (!gameOver) {  // Faqat o'yin hali tugamagan bo'lsa, game over ni chaqirish
+                gameOver = true;
+                alert("Game Over!");
+                resetGame();
+            }
         }
     });
 }
+
+
 
 
 // Pozitsiyalarni yangilash
@@ -178,6 +188,8 @@ function startTimer() {
     }, 1000);
 }
 
+let gameLoopRequest; // Global o'zgaruvchi, game loop uchun request aniqlanadi
+
 // O'yinni qayta boshlash
 function resetGame() {
     playerPosition = { x: 100, y: 100 };
@@ -185,16 +197,18 @@ function resetGame() {
     gamePaused = false;  // O'yinni qayta ishga tushiradi
     timeLeft = 10;  // 10 soniya vaqtni tiklash
     updatePositions();
+    gameOver = false;  // gameOver holatini qayta o'rnatish
+    playerVelocity = { x: 0, y: 0 };  // O'yinchi tezligini to'xtatish
 }
 
-// O'yinni yangilash
+// O'yin tsiklini yaratish (game loop)
 function gameLoop() {
-    if (gamePaused) return;  // Agar o'yin to'xtatilgan bo'lsa, loopni to'xtatish
+    if (gamePaused || gameOver) return;  // Agar o'yin to'xtatilgan bo'lsa yoki o'yin tugagan bo'lsa, loopni to'xtatish
 
     updatePlayerPosition();  // O'yinchi tezligini yangilash
     moveBots();              // Botlar harakatini yangilash
     checkCollision();        // To'qnashuvni tekshirish
-    requestAnimationFrame(gameLoop);  // Keyingi frame uchun qayta chaqirish
+    gameLoopRequest = requestAnimationFrame(gameLoop);  // Keyingi frame uchun qayta chaqirish
 }
 
 startTimer();  // Vaqtni boshlash
