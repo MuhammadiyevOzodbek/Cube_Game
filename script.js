@@ -130,7 +130,7 @@ function checkCollision() {
         const distance = Math.sqrt(dx * dx + dy * dy); // Evklid masofasi
 
         // Masofa 50px yoki undan kichik bo'lsa, to'qnashuv bo'ladi
-        if (distance < 30) {
+        if (distance < 45) {
             alert("Game Over!");
             resetGame(); // O'yinni qayta boshlash
         }
