@@ -152,9 +152,6 @@ function checkCollision() {
     });
 }
 
-
-
-
 // Pozitsiyalarni yangilash
 function updatePositions() {
     playerCube.style.left = playerPosition.x + 'px';
@@ -220,4 +217,4 @@ function gameLoop() {
 }
 
 startTimer();  // Vaqtni boshlash
-gameLoop();
+gameLoop();  // O'yinni boshlash
